@@ -1,0 +1,10 @@
+# Core dependencies for bridge grillage analysis
+# Xarray: For multi-dimensional array data structures and analysis
+xarray>=2023.1.0
+
+# Plotly: For interactive 2D and 3D visualization
+plotly>=5.14.0
+
+# Additional dependencies for Xarray functionality
+numpy>=1.24.0
+pandas>=2.0.0
