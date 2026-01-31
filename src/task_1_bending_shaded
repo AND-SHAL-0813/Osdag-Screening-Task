@@ -1,0 +1,60 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+# -------------------------------------------------
+# STEP 1: Load Xarray dataset
+# -------------------------------------------------
+file_path = r"D:\Osdag_Project\data\screening_task.nc"
+ds = xr.open_dataset(file_path)
+
+# -------------------------------------------------
+# STEP 2 & 3: Data Preparation
+# -------------------------------------------------
+central_girder = [15, 24, 33, 42, 51, 60, 69, 78, 83]
+x_positions = []
+Mz_values = []
+current_x = 0
+
+# STEP 4: Extract Bending Moment Data
+for i, elem in enumerate(central_girder):
+    Mz_i = ds["forces"].sel(Component="Mz_i", Element=elem).values.item()
+    Mz_j = ds["forces"].sel(Component="Mz_j", Element=elem).values.item()
+
+    if i == 0:
+        x_positions.append(current_x)
+        Mz_values.append(Mz_i)
+
+    current_x += 1
+    x_positions.append(current_x)
+    Mz_values.append(Mz_j)
+
+# -------------------------------------------------
+# STEP 5: Plotting the Bending Moment Diagram (BMD)
+# -------------------------------------------------
+plt.figure(figsize=(10, 6))
+
+plt.plot(x_positions, Mz_values, color='red', linewidth=2, label='Mz (kNm)')
+plt.fill_between(x_positions, 0, Mz_values, color='red', alpha=0.3)
+
+# Formatting
+plt.title('Task 1: Bending Moment Diagram (Central Girder)')
+plt.xlabel('Distance along Bridge (Element Units)')
+plt.ylabel('Moment (kNm)')
+plt.grid(True, linestyle='--')
+plt.axhline(0, color='black', linewidth=0.8)
+plt.legend()
+
+plt.tight_layout()
+
+# -------------------------------------------------
+# STEP 6: Save and Display
+# -------------------------------------------------
+output_dir = r"D:\Osdag_Project\outputs\task_1_2d_plots"
+os.makedirs(output_dir, exist_ok=True)
+
+plt.savefig(os.path.join(output_dir, "task_1_bmd_only.png"), dpi=300)
+print(f"BMD successfully saved to: {output_dir}")
+
+plt.show()
