@@ -1,0 +1,57 @@
+
+
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# -------------------------------------------------
+# STEP 1: Load Xarray dataset
+# -------------------------------------------------
+ds = xr.open_dataset("D:\Osdag_Project\data\screening_task.nc")
+
+# -------------------------------------------------
+# STEP 2: Central girder element list
+# -------------------------------------------------
+central_girder = [15, 24, 33, 42, 51, 60, 69, 78, 83]
+
+# -------------------------------------------------
+# STEP 3: Prepare lists for plotting
+# -------------------------------------------------
+x_positions = []
+Mz_values = []
+Vy_values = []
+
+current_x = 0
+
+# -------------------------------------------------
+# STEP 4: Extract data WITHOUT duplication
+# -------------------------------------------------
+for i, elem in enumerate(central_girder):
+    Mz_i = ds["forces"].sel(Component="Mz_i", Element=elem).values
+    Mz_j = ds["forces"].sel(Component="Mz_j", Element=elem).values
+    Vy_i = ds["forces"].sel(Component="Vy_i", Element=elem).values
+    Vy_j = ds["forces"].sel(Component="Vy_j", Element=elem).values
+
+    if i == 0:
+        # First element → take both start & end
+        x_positions.append(current_x)
+        Mz_values.append(Mz_i)
+        Vy_values.append(Vy_i)
+
+    # Always add end node
+    current_x += 1
+    x_positions.append(current_x)
+    Mz_values.append(Mz_j)
+    Vy_values.append(Vy_j)
+
+# -------------------------------------------------
+# STEP 5: Plot Bending Moment Diagram (BMD)
+# -------------------------------------------------
+plt.figure(figsize=(8, 4))
+plt.plot(x_positions, Mz_values, marker='o', color='red')
+plt.axhline(0, color='black', linewidth=0.8)
+plt.title("Bending Moment Diagram (Central Girder)")
+plt.xlabel("Position along Girder")
+plt.ylabel("Bending Moment (Mz)")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
