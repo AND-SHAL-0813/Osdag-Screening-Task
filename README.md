@@ -86,7 +86,7 @@ python src/task2_3d_plots.py
 
 | Resource | Description | Access Link |
 | :--- | :--- | :--- |
-| 🎥 **Video Demonstration** | Full walkthrough of the 2D and 3D visualization functionality. | [Watch on YouTube](INSERT_YOUR_YOUTUBE_LINK_HERE) |
+| 🎥 **Video Demonstration** | Full walkthrough of the 2D and 3D visualization functionality. | [Watch on YouTube](https://youtu.be/ujgE76GpMfY) |
 | 📄 **Technical Report** | Detailed documentation on Xarray processing and mapping logic. | [View PDF Document](https://github.com/AND-SHAL-0813/Osdag-Screening-Task/blob/main/Osdeg_Technical%20Report.pdf) |
 | ⚖️ **Project License** | Licensed under Creative Commons Attribution-ShareAlike 4.0. | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
 
