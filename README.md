@@ -8,7 +8,7 @@
 [![Status](https://img.shields.io/badge/Status-Screening%20Task-green.svg)]()
 
 ## 📖 Project Overview
-[cite_start]This repository contains the implementation of the **Osdag Screening Task** for Xarray and Plotly/PyPlot[cite: 4, 5]. [cite_start]The project automates the extraction of internal forces from structural datasets and generates high-fidelity 2D and 3D engineering diagrams[cite: 8, 9].
+This repository contains the implementation of the **Osdag Screening Task** for Xarray and Plotly/PyPlot. The project automates the extraction of internal forces from structural datasets and generates high-fidelity 2D and 3D engineering diagrams.
 
 ---
 
