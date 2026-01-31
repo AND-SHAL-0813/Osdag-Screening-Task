@@ -1,0 +1,66 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+# -------------------------------------------------
+# STEP 1: Load Xarray dataset (Using 'r' for Windows path)
+# -------------------------------------------------
+file_path = r"D:\Osdag_Project\data\screening_task.nc"
+ds = xr.open_dataset(file_path)
+
+# -------------------------------------------------
+# STEP 2 & 3: Data Preparation
+# -------------------------------------------------
+central_girder = [15, 24, 33, 42, 51, 60, 69, 78, 83]
+x_positions = []
+Vy_values = []
+current_x = 0
+
+# -------------------------------------------------
+# STEP 4: Extract Shear Force Data
+# -------------------------------------------------
+for i, elem in enumerate(central_girder):
+    # Extract values and convert to scalar using .item()
+    Vy_i = ds["forces"].sel(Component="Vy_i", Element=elem).values.item()
+    Vy_j = ds["forces"].sel(Component="Vy_j", Element=elem).values.item()
+
+    if i == 0:
+        # First element: add start point
+        x_positions.append(current_x)
+        Vy_values.append(Vy_i)
+
+    # Add end point for every element
+    current_x += 1
+    x_positions.append(current_x)
+    Vy_values.append(Vy_j)
+
+# -------------------------------------------------
+# STEP 5: Plotting the SFD
+# -------------------------------------------------
+plt.figure(figsize=(10, 5))
+
+plt.plot(x_positions, Vy_values, color='blue', linewidth=2, label='Vy (kN)')
+plt.fill_between(x_positions, 0, Vy_values, color='blue', alpha=0.3)
+
+# Formatting the plot
+plt.title('Task 1: Shear Force Diagram (Central Girder)')
+plt.xlabel('Distance along Bridge (Element Units)')
+plt.ylabel('Shear Force (kN)')
+plt.grid(True, linestyle='--')
+plt.axhline(0, color='black', linewidth=1)
+plt.legend()
+
+plt.tight_layout()
+
+# -------------------------------------------------
+# STEP 6: Save and Display
+# -------------------------------------------------
+output_dir = r"D:\Osdag_Project\outputs\task_1_2d_plots"
+os.makedirs(output_dir, exist_ok=True)
+
+save_path = os.path.join(output_dir, "task_1_sfd_only.png")
+plt.savefig(save_path, dpi=300)
+print(f"SFD successfully saved to: {save_path}")
+
+plt.show()
