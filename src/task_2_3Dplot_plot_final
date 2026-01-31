@@ -1,0 +1,171 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# -----------------------------------------------
+ds = xr.open_dataset("D:\Osdag_Project\data\screening_task.nc")
+
+# -------------------------------------------------
+# STEP 2: Node coordinates (example format)
+# Replace with actual data from provided file
+# -------------------------------------------------
+nodes = {
+    1: (0, 0, 0),  11: (5, 0, 0), 16: (10, 0, 0), 21: (15, 0, 0),
+    26: (20, 0, 0), 31: (25, 0, 0), 36: (30, 0, 0), 41: (35, 0, 0),
+    46: (40, 0, 0), 6: (45, 0, 0)
+}
+
+# -------------------------------------------------
+# STEP 3: Girder definitions (from PDF)
+# -------------------------------------------------
+girders = {
+    "Girder 1": {
+        "elements": [13, 22, 31, 40, 49, 58, 67, 76, 81],
+        "nodes":    [1, 11, 16, 21, 26, 31, 36, 41, 46, 6]
+    }
+}
+
+# -------------------------------------------------
+# STEP 4: Create 3D plot
+# -------------------------------------------------
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection='3d')
+
+# -------------------------------------------------
+# STEP 5: Draw bridge frame
+# -------------------------------------------------
+for girder in girders.values():
+    node_list = girder["nodes"]
+
+    for i in range(len(node_list) - 1):
+        n1, n2 = node_list[i], node_list[i + 1]
+
+        x = [nodes[n1][0], nodes[n2][0]]
+        y = [nodes[n1][1], nodes[n2][1]]
+        z = [nodes[n1][2], nodes[n2][2]]
+
+        ax.plot(x, y, z, color="black", linewidth=2)
+
+# -------------------------------------------------
+# STEP 6: Extrude SHEAR FORCE (Vy)
+# -------------------------------------------------
+for girder in girders.values():
+    elem_list = girder["elements"]
+    node_list = girder["nodes"]
+
+    for i, elem in enumerate(elem_list):
+        n1 = node_list[i]
+        n2 = node_list[i + 1]
+
+        # Mid-point of element
+        mid_x = (nodes[n1][0] + nodes[n2][0]) / 2
+        mid_z = (nodes[n1][2] + nodes[n2][2]) / 2
+
+        # Use average shear force
+        Vy_i = ds["forces"].sel(Element=elem, Component="Vy_i").values
+        Vy_j = ds["forces"].sel(Element=elem, Component="Vy_j").values
+        Vy = (Vy_i + Vy_j) / 2
+
+        ax.plot(
+            [mid_x, mid_x],
+            [0, Vy],
+            [mid_z, mid_z],
+            color="red"
+        )
+
+# -----------------------------------------------
+
+Mz_i = ds["forces"].sel(Element=elem, Component="Mz_i").values
+Mz_j = ds["forces"].sel(Element=elem, Component="Mz_j").values
+Mz = (Mz_i + Mz_j) / 2
+
+ax.plot(
+    [mid_x, mid_x],
+    [0, Mz],
+    [mid_z, mid_z],
+    color="blue"
+)
+
+
+ax.set_ylabel("Bending Moment (Mz)")
+ax.set_title("3D Bending Momenat Diagram (MIDAS Style)")
+
+
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Draw bridge frame
+for girder in girders.values():
+    node_list = girder["nodes"]
+
+    for i in range(len(node_list) - 1):
+        n1, n2 = node_list[i], node_list[i + 1]
+
+        x = [nodes[n1][0], nodes[n2][0]]
+        y = [nodes[n1][1], nodes[n2][1]]
+        z = [nodes[n1][2], nodes[n2][2]]
+
+        ax.plot(x, y, z, color="black", linewidth=2, label="_nolegend_") # Label set to _nolegend_ to avoid duplicate entries
+
+# Extrude SHEAR FORCE (Vy) and BENDING MOMENT (Mz)
+has_vy_label = False
+has_mz_label = False
+for girder in girders.values():
+    elem_list = girder["elements"]
+    node_list = girder["nodes"]
+
+    for i, elem in enumerate(elem_list):
+        n1 = node_list[i]
+        n2 = node_list[i + 1]
+
+        # Mid-point of element
+        mid_x = (nodes[n1][0] + nodes[n2][0]) / 2
+        mid_z = (nodes[n1][2] + nodes[n2][2]) / 2
+
+        # Use average shear force
+        Vy_i = ds["forces"].sel(Element=elem, Component="Vy_i").values
+        Vy_j = ds["forces"].sel(Element=elem, Component="Vy_j").values
+        Vy = (Vy_i + Vy_j) / 2
+
+        # Use average bending moment
+        Mz_i = ds["forces"].sel(Element=elem, Component="Mz_i").values
+        Mz_j = ds["forces"].sel(Element=elem, Component="Mz_j").values
+        Mz = (Mz_i + Mz_j) / 2
+
+        # Plot Shear Force (Vy)
+        if not has_vy_label:
+            ax.plot([mid_x, mid_x],
+                    [0, Vy],
+                    [mid_z, mid_z],
+                    color="red", label="Shear Force (Vy)")
+            has_vy_label = True
+        else:
+            ax.plot([mid_x, mid_x],
+                    [0, Vy],
+                    [mid_z, mid_z],
+                    color="red", label="_nolegend_")
+
+        # Plot Bending Moment (Mz)
+        if not has_mz_label:
+            ax.plot([mid_x, mid_x],
+                    [0, Mz],
+                    [mid_z, mid_z],
+                    color="blue", label="Bending Moment (Mz)")
+            has_mz_label = True
+        else:
+            ax.plot([mid_x, mid_x],
+                    [0, Mz],
+                    [mid_z, mid_z],
+                    color="blue", label="_nolegend_")
+
+# Set labels and title
+ax.set_xlabel("X-coordinate (m)")
+ax.set_ylabel("Force/Moment Magnitude")
+ax.set_zlabel("Z-coordinate (m)")
+ax.set_title("3D Shear Force and Bending Moment Diagrams")
+
+# Display legend
+ax.legend()
+
+# Show plot
+plt.show()
