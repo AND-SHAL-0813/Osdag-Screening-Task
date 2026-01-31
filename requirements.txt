@@ -1,0 +1,5 @@
+xarray
+plotly
+pandas
+numpy
+netCDF4
