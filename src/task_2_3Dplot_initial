@@ -1,0 +1,86 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import os
+
+# -------------------------------------------------
+# STEP 1: Load Xarray dataset (Fixed Path)
+# -------------------------------------------------
+file_path = r"D:\Osdag_Project\data\screening_task.nc"
+ds = xr.open_dataset(file_path)
+
+# -------------------------------------------------
+# STEP 2: Node coordinates
+# -------------------------------------------------
+nodes = {
+    1: (0, 0, 0),  11: (5, 0, 0), 16: (10, 0, 0), 21: (15, 0, 0),
+    26: (20, 0, 0), 31: (25, 0, 0), 36: (30, 0, 0), 41: (35, 0, 0),
+    46: (40, 0, 0), 6: (45, 0, 0)
+}
+
+# -------------------------------------------------
+# STEP 3: Girder definitions
+# -------------------------------------------------
+girders = {
+    "Girder 1": {
+        "elements": [13, 22, 31, 40, 49, 58, 67, 76, 81],
+        "nodes":    [1, 11, 16, 21, 26, 31, 36, 41, 46, 6]
+    }
+}
+
+# -------------------------------------------------
+# STEP 4: Create 3D plot
+# -------------------------------------------------
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Scaling factor: Adjust this if the red lines are too long or too short
+scale = 0.01 
+
+# -------------------------------------------------
+# STEP 5: Draw bridge frame and Extrude Forces
+# -------------------------------------------------
+for g_name, data in girders.items():
+    elem_list = data["elements"]
+    node_list = data["nodes"]
+
+    # Draw the main girder line (Black)
+    for i in range(len(node_list) - 1):
+        n1, n2 = node_list[i], node_list[i + 1]
+        x_coords = [nodes[n1][0], nodes[n2][0]]
+        y_coords = [nodes[n1][1], nodes[n2][1]]
+        z_coords = [nodes[n1][2], nodes[n2][2]]
+        ax.plot(x_coords, y_coords, z_coords, color="black", linewidth=3)
+
+    # Draw Shear Force Extrusions (Red)
+    for i, elem in enumerate(elem_list):
+        n1, n2 = node_list[i], node_list[i+1]
+        
+        # Calculate Mid-point for extrusion placement
+        mid_x = (nodes[n1][0] + nodes[n2][0]) / 2
+        mid_z = (nodes[n1][2] + nodes[n2][2]) / 2
+        
+        # Get Force Data
+        vy_i = ds["forces"].sel(Element=elem, Component="Vy_i").values.item()
+        vy_j = ds["forces"].sel(Element=elem, Component="Vy_j").values.item()
+        vy_avg = (vy_i + vy_j) / 2
+        
+        # Plot vertical lines representing force magnitude
+        ax.plot([mid_x, mid_x], [0, vy_avg * scale], [mid_z, mid_z], 
+                color="red", linewidth=2)
+
+# -------------------------------------------------
+# STEP 6: Final Formatting and DISPLAY
+# -------------------------------------------------
+ax.set_xlabel('X: Bridge Length (m)')
+ax.set_ylabel('Y: Force Magnitude (Scaled)')
+ax.set_zlabel('Z: Bridge Width (m)')
+ax.set_title('3D Bridge Analysis - Shear Force Extrusion')
+
+# Save logic
+output_dir = r"D:\Osdag_Project\outputs\task_2_3d_plots"
+os.makedirs(output_dir, exist_ok=True)
+plt.savefig(os.path.join(output_dir, "task_2_3d_viz.png"))
+
+print("3D Plot generated successfully.")
+plt.show() 
