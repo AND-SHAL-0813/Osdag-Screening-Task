@@ -12,5 +12,5 @@ This project performs structural visualization for bridge girders using **Xarray
 ## 🚀 Getting Started
 1. **Clone & Install:**
    ```bash
-   git clone [https://github.com/AND-SHAL-0813/Osdag-Screening-Task.git](https://github.com/YOUR_USERNAME/Osdag-Screening-Task.git)
+   git clone [https://github.com/AND-SHAL-0813/Osdag-Screening-Task.git](https://github.com/AND-SHAL-0813/Osdag-Screening-Task.git)
    pip install -r requirements.txt
